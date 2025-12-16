@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Payment - Cinema Booking</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial;
+        background: #0f0f0f;
+        color: #fff;
+      }
+      header {
+        background: #000;
+        padding: 20px;
+      }
+      .main {
+        padding: 30px;
+        max-width: 800px;
+        margin: auto;
+      }
+      button {
+        padding: 12px 18px;
+        border-radius: 8px;
+        border: none;
+        background: #f1c40f;
+        cursor: pointer;
+      }
+      select {
+        padding: 8px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>💳 Payment</h1>
+    </header>
+    <div class="main">
+      <h2>Order Summary</h2>
+      <p>Total: <strong id="total">0</strong> EGP</p>
+      <p>Select Payment Method</p>
+      <select id="payMethod">
+        <option>Visa</option>
+        <option>InstaPay</option>
+        <option>Fawry</option>
+      </select>
+      <div style="margin-top: 18px">
+        <button onclick="confirmPayment()">Confirm & Pay</button>
+        <button onclick="location.href='project.html'">Cancel</button>
+      </div>
+    </div>
+
+    <div class="main" id="success" style="display: none">
+      <h2>✅ Booking Confirmed</h2>
+      <p id="ticketCode"></p>
+      <button onclick="location.href='project.html'">Home</button>
+    </div>
+
+    <script>
+      function getCart() {
+        const t = Number(localStorage.getItem("cartTotal"));
+        if (!isNaN(t) && t > 0) return t;
+        try {
+          const items = JSON.parse(localStorage.getItem("cartItems") || "[]");
+          return items.reduce((s, i) => s + Number(i.price || 0), 0);
+        } catch (e) {
+          return 0;
+        }
+      }
+      function getCartTotal() {
+        const storedTotal = Number(localStorage.getItem("cartTotal"));
+        if (!isNaN(storedTotal) && storedTotal > 0) return storedTotal;
+        try {
+          const items = JSON.parse(localStorage.getItem("cartItems") || "[]");
+          return items.reduce((sum, item) => sum + Number(item.price || 0), 0);
+        } catch (e) {
+          return 0;
+        }
+      }
+      function clearCartData() {
+        localStorage.removeItem("cartTotal");
+        localStorage.removeItem("cartItems");
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("total").innerText = getCartTotal();
+      });
+      function confirmPayment() {
+        const code = "TICKET-" + Math.floor(Math.random() * 1000000);
+        document.getElementById("ticketCode").innerText =
+          "🎟️ Ticket Code: " + code;
+        document.querySelector(".main").style.display = "none";
+        document.getElementById("success").style.display = "block";
+        clearCartData();
+      }
+    </script>
+  </body>
+</html>

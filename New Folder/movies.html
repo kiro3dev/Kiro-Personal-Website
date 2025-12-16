@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Movies - Cinema Booking</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial;
+        background: #0f0f0f;
+        color: #fff;
+      }
+      header {
+        background: #000;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #f1c40f;
+      }
+      .main {
+        padding: 30px;
+        max-width: 1000px;
+        margin: auto;
+      }
+      .movie {
+        background: #222;
+        padding: 20px;
+        margin: 12px 0;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .movie {
+        transition: 0.18s ease;
+      }
+      .movie:hover {
+        background: #2c2c2c;
+        transform: scale(1.01);
+      }
+      .seats {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        margin: 20px 0;
+      }
+      .seat {
+        padding: 16px;
+        background: #555;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .seat {
+        transition: 0.12s ease;
+      }
+      .seat:hover {
+        filter: brightness(1.12);
+        transform: translateY(-4px);
+      }
+      .vip {
+        background: #8e44ad;
+      }
+      .box {
+        background: #222;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      button {
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background: #f1c40f;
+        cursor: pointer;
+      }
+      .total {
+        color: #2ecc71;
+        margin-top: 12px;
+      }
+      .selected {
+        outline: 4px solid #2ecc71;
+      }
+      .cart-list {
+        margin-top: 16px;
+      }
+      .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #111;
+        padding: 8px 12px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+      .remove-btn {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🎬 Movies</h1>
+      <div>
+        <button onclick="location.href='project.html'">Back Home</button>
+      </div>
+    </header>
+
+    <div class="main" id="movies">
+      <h2>Select a Movie</h2>
+      <div class="movie" onclick="showSeatSelectionForMovie(0)">
+        Action Movie
+      </div>
+      <div class="movie" onclick="showSeatSelectionForMovie(1)">
+        Comedy Movie
+      </div>
+      <div class="movie" onclick="showSeatSelectionForMovie(2)">
+        Horror Movie
+      </div>
+    </div>
+
+    <div class="main" id="seats" style="display: none">
+      <h2 id="movieTitle">Select Your Seat</h2>
+      <p>VIP (Front) - 200 EGP | Regular (Back) - 120 EGP</p>
+      <div class="seats" id="seatsBox"></div>
+      <div id="cartList" class="box cart-list">
+        <strong>Cart Items</strong>
+        <div id="cartItemsContainer" style="margin-top: 8px"></div>
+      </div>
+      <div style="margin-top: 18px">
+        <span class="total">Total: </span><span id="cartTotal">0</span> EGP
+      </div>
+      <div style="margin-top: 16px">
+        <button onclick="location.href='cafe.html'">Add Cafeteria Items</button>
+        <button onclick="location.href='payment.html'">
+          Proceed to Payment
+        </button>
+        <button onclick="location.href='project.html'">Cancel</button>
+      </div>
+    </div>
+
+    <script>
+      // Read the cart items array from localStorage
+      function getCartItems() {
+        try {
+          return JSON.parse(localStorage.getItem("cartItems") || "[]");
+        } catch (err) {
+          return [];
+        }
+      }
+
+      // Save the cart items and update the cached total
+      function saveCartItems(cartItems) {
+        localStorage.setItem("cartItems", JSON.stringify(cartItems));
+        const totalValue = cartItems.reduce(
+          (sum, item) => sum + Number(item.price || 0),
+          0
+        );
+        localStorage.setItem("cartTotal", totalValue);
+        updateCartTotalDisplay();
+        renderCartItems();
+      }
+
+      // Add a named item to the cart (e.g. seat or cafeteria item)
+      function addItemToCart(itemName, itemPrice, seatElement) {
+        const items = getCartItems();
+        items.push({ name: itemName, price: itemPrice });
+        saveCartItems(items);
+        if (seatElement) seatElement.classList.add("selected");
+      }
+
+      // Render cart items into the cart list area with remove buttons
+      function renderCartItems() {
+        const container = document.getElementById("cartItemsContainer");
+        if (!container) return;
+        const items = getCartItems();
+        container.innerHTML = "";
+        if (items.length === 0) {
+          container.innerHTML = '<div style="color:#aaa">Cart is empty</div>';
+          return;
+        }
+        items.forEach((item, index) => {
+          const row = document.createElement("div");
+          row.className = "cart-item";
+          const left = document.createElement("div");
+          left.innerText = item.name + " - " + item.price + " EGP";
+          const btn = document.createElement("button");
+          btn.className = "remove-btn";
+          btn.innerText = "Remove";
+          btn.onclick = function () {
+            removeCartItem(index);
+          };
+          row.appendChild(left);
+          row.appendChild(btn);
+          container.appendChild(row);
+        });
+      }
+
+      // Remove a cart item by index and update UI/state
+      function removeCartItem(index) {
+        const items = getCartItems();
+        if (index < 0 || index >= items.length) return;
+        const removed = items.splice(index, 1)[0];
+        saveCartItems(items);
+        // If removed item corresponds to a seat element, unselect it if no more of same name exist
+        const stillExists = items.some((i) => i.name === removed.name);
+        if (!stillExists) {
+          const seats = document.querySelectorAll(".seat");
+          seats.forEach((s) => {
+            if (s.innerText === removed.name) s.classList.remove("selected");
+          });
+        }
+      }
+
+      // Update the visible total next to "Total:" in this page
+      function updateCartTotalDisplay() {
+        const totalElement = document.getElementById("cartTotal");
+        if (!totalElement) return;
+        const items = getCartItems();
+        const total = items.reduce(
+          (sum, item) => sum + Number(item.price || 0),
+          0
+        );
+        totalElement.innerText = total;
+      }
+
+      // Show seat selection for the chosen movie index
+      function showSeatSelectionForMovie(movieIndex) {
+        document.getElementById("movies").style.display = "none";
+        document.getElementById("seats").style.display = "block";
+        const movieTitles = ["Action Movie", "Comedy Movie", "Horror Movie"];
+        const titleText =
+          (movieTitles[movieIndex] || "Movie") + " - Select Your Seat";
+        document.getElementById("movieTitle").innerText = titleText;
+        createSeatElements();
+        updateCartTotalDisplay();
+      }
+
+      // Create seat DOM elements and attach simple handlers
+      function createSeatElements() {
+        const seatsBox = document.getElementById("seatsBox");
+        seatsBox.innerHTML = "";
+
+        // Create 5 VIP seats
+        for (let seatNumber = 1; seatNumber <= 5; seatNumber++) {
+          const seatElement = document.createElement("div");
+          seatElement.className = "seat vip";
+          seatElement.innerText = "VIP " + seatNumber;
+          // Use a named function so beginners understand what's passed
+          seatElement.onclick = function () {
+            addItemToCart("VIP " + seatNumber, 200, seatElement);
+          };
+          // Mark selected if already in cart
+          const inCart = getCartItems().some(
+            (i) => i.name === seatElement.innerText
+          );
+          if (inCart) seatElement.classList.add("selected");
+          seatsBox.appendChild(seatElement);
+        }
+
+        // Create 5 Regular seats
+        for (let seatNumber = 1; seatNumber <= 5; seatNumber++) {
+          const seatElement = document.createElement("div");
+          seatElement.className = "seat";
+          seatElement.innerText = "Regular " + seatNumber;
+          seatElement.onclick = function () {
+            addItemToCart("Regular " + seatNumber, 120, seatElement);
+          };
+          const inCart = getCartItems().some(
+            (i) => i.name === seatElement.innerText
+          );
+          if (inCart) seatElement.classList.add("selected");
+          seatsBox.appendChild(seatElement);
+        }
+      }
+
+      // When the page loads, show the current cart total
+      document.addEventListener("DOMContentLoaded", function () {
+        updateCartTotalDisplay();
+        renderCartItems();
+      });
+    </script>
+  </body>
+</html>

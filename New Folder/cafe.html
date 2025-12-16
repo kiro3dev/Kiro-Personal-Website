@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cafeteria - Cinema Booking</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial;
+        background: #0f0f0f;
+        color: #fff;
+      }
+      header {
+        background: #000;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #f1c40f;
+      }
+      .main {
+        padding: 30px;
+        max-width: 1000px;
+        margin: auto;
+      }
+      .box {
+        background: #222;
+        padding: 20px;
+        margin: 12px 0;
+        border-radius: 10px;
+      }
+      .box p {
+        transition: 0.12s ease;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 6px;
+      }
+      .box p:hover {
+        background: #333;
+        color: #fff;
+        transform: translateX(4px);
+      }
+      button {
+        padding: 12px 18px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background: #f1c40f;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>☕ Cafeteria</h1>
+      <div>
+        <button onclick="location.href='project.html'">Back Home</button>
+      </div>
+    </header>
+
+    <div class="main">
+      <div class="box">
+        <h3>🍿 Popcorn</h3>
+        <p onclick="addItemToCart('Small Popcorn',40,this)">Small - 40</p>
+        <p onclick="addItemToCart('Large Popcorn',60,this)">Large - 60</p>
+        <p onclick="addItemToCart('Pepsi',20,this)">Pepsi - 20</p>
+      </div>
+      <div class="box">
+        <h3>🍫 Chocolates</h3>
+        <p onclick="addItemToCart('KitKat',25,this)">KitKat - 25</p>
+        <p onclick="addItemToCart('Maltesers',50,this)">Maltesers - 50</p>
+        <p onclick="addItemToCart('Cadbury',35,this)">Cadbury - 35</p>
+      </div>
+      <div class="box">
+        <h3>🥤 Drinks & Sandwiches</h3>
+        <p onclick="addItemToCart('Can',25,this)">Can - 25</p>
+        <p onclick="addItemToCart('Sandwich',65,this)">Sandwich - 65</p>
+      </div>
+
+      <div class="box">
+        <h3>🧾 Cart</h3>
+        <ul id="cartList" style="list-style: none; padding: 0; margin: 0"></ul>
+        <div style="margin-top: 12px">
+          Total: <strong id="cartTotal">0</strong> EGP
+        </div>
+        <div style="margin-top: 12px">
+          <button onclick="location.href='movies.html'">Choose Movie</button>
+          <button onclick="location.href='payment.html'">Proceed to Payment</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function getCartItems(){ return JSON.parse(localStorage.getItem('cartItems') || '[]'); }
+      function setCartItems(items){
+        localStorage.setItem('cartItems', JSON.stringify(items));
+        const total = items.reduce((s,i) => s + Number(i.price || 0), 0);
+        localStorage.setItem('cartTotal', total);
+        updateCartDisplay();
+      }
+
+      function addItemToCart(itemName, itemPrice, clickedElement){
+        const items = getCartItems();
+        items.push({name: itemName, price: itemPrice});
+        setCartItems(items);
+        if(clickedElement) clickedElement.classList.add('selected');
+      }
+
+      function removeFromCart(itemIndex){
+        const items = getCartItems();
+        if(itemIndex >= 0 && itemIndex < items.length){
+          items.splice(itemIndex,1);
+          setCartItems(items);
+        }
+      }
+
+      function updateCartDisplay(){
+        const items = getCartItems();
+        const list = document.getElementById('cartList');
+        list.innerHTML = '';
+        items.forEach((cartItem, index) => {
+          const listItem = document.createElement('li');
+          listItem.style.padding = '8px 6px';
+          listItem.style.display = 'flex';
+          listItem.style.justifyContent = 'space-between';
+          listItem.style.alignItems = 'center';
+          listItem.innerHTML = `<span>${cartItem.name} — ${cartItem.price} EGP</span>`;
+          const removeButton = document.createElement('button');
+          removeButton.textContent = 'Remove';
+          removeButton.style.marginLeft = '12px';
+          removeButton.onclick = () => removeFromCart(index);
+          listItem.appendChild(removeButton);
+          list.appendChild(listItem);
+        });
+        const total = items.reduce((s,i) => s + Number(i.price || 0), 0);
+        document.getElementById('cartTotal').innerText = total;
+      }
+
+      document.addEventListener('DOMContentLoaded', ()=>{ updateCartDisplay(); });
+    </script>
+  </body>
+</html>

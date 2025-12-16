@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cinema Booking System</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial;
+        background: #0f0f0f;
+        color: #fff;
+      }
+      header {
+        background: #000;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #f1c40f;
+      }
+      .cart {
+        font-size: 18px;
+        background: #222;
+        padding: 10px 20px;
+        border-radius: 8px;
+      }
+      .main {
+        padding: 30px;
+        max-width: 1000px;
+        margin: auto;
+      }
+      .card {
+        background: #1c1c1c;
+        padding: 40px;
+        margin: 25px 0;
+        border-radius: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .card:hover {
+        background: #2c2c2c;
+        transform: scale(1.02);
+      }
+      .card h2 {
+        font-size: 32px;
+        color: #f1c40f;
+      }
+      section {
+        display: none;
+      }
+      .active {
+        display: block;
+      }
+      /* Removed unused movie/seat/box styles (moved to separate pages) */
+      button {
+        padding: 15px 30px;
+        font-size: 18px;
+        border: none;
+        border-radius: 8px;
+        background: #f1c40f;
+        cursor: pointer;
+      }
+      .total {
+        font-size: 22px;
+        color: #2ecc71;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🎬 Cinema Booking</h1>
+      <div class="cart">🛒 Total: <span id="cartTotal">0</span> EGP</div>
+    </header>
+
+    <div class="main" id="home">
+      <div class="card" onclick="location.href='movies.html'">
+        <h2>🎬 Movies</h2>
+        <p>Select movie & seat</p>
+      </div>
+      <div class="card" onclick="location.href='cafe.html'">
+        <h2>☕ Cafeteria</h2>
+        <p>Food & drinks menu</p>
+      </div>
+      <div class="card" onclick="location.href='rules.html'">
+        <h2>⚠️ Rules</h2>
+        <p>Cinema instructions</p>
+      </div>
+    </div>
+
+    <script>
+      function readCartItems() {
+        try {
+          return JSON.parse(localStorage.getItem("cartItems") || "[]");
+        } catch (e) {
+          return [];
+        }
+      }
+      function calculateCartTotal() {
+        const stored = Number(localStorage.getItem("cartTotal"));
+        if (!isNaN(stored) && stored > 0) return stored;
+        const items = readCartItems();
+        return items.reduce((sum, it) => sum + Number(it.price || 0), 0);
+      }
+      function refreshHeaderCart() {
+        const el = document.getElementById("cartTotal");
+        if (el) el.innerText = calculateCartTotal();
+      }
+      window.addEventListener("storage", refreshHeaderCart);
+      document.addEventListener("DOMContentLoaded", refreshHeaderCart);
+    </script>
+  </body>
+</html>
